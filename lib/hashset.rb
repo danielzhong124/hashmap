@@ -2,7 +2,7 @@
 
 require_relative 'linked_list'
 
-class HashMap
+class HashSet
   def initialize(capacity = 16, load_factor = 0.75)
     @buckets = Array.new(capacity) { LinkedList.new }
     @load_factor = load_factor
@@ -16,16 +16,12 @@ class HashMap
     hash_code % capacity
   end
 
-  def set(key, value)
+  def set(key)
     bucket = @buckets[hash(key)]
-    return if bucket.update(key, value)
+    return if bucket.contains?(key)
 
-    bucket.append(key, value)
+    bucket.append(key)
     grow_buckets if length > capacity * @load_factor
-  end
-
-  def get(key)
-    @buckets[hash(key)].get(key)
   end
 
   def has?(key)
@@ -56,29 +52,11 @@ class HashMap
     result
   end
 
-  def values
-    result = []
-    @buckets.each do |bucket|
-      bucket.each { |entry| result << entry.value }
-    end
-
-    result
-  end
-
-  def entries
-    result = []
-    @buckets.each do |bucket|
-      bucket.each { |entry| result << [entry.key, entry.value] }
-    end
-
-    result
-  end
-
   def grow_buckets
-    all_entries = entries
+    all_keys = keys
     @buckets = Array.new(capacity * 2) { LinkedList.new }
 
-    all_entries.each { |key, value| @buckets[hash(key)].append(key, value) }
+    all_keys.each { |key| @buckets[hash(key)].append(key) }
   end
 
   def capacity
